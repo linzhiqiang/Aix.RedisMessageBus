@@ -16,8 +16,8 @@ namespace Aix.RedisMessageBus
             this.Serializer = new MessagePackSerializer();
             this.DataExpireDay = 7;
             this.DefaultConsumerThreadCount = 2;
-            this.ErrorReEnqueueIntervalSecond = 30;
-            this.ExecuteTimeoutSecond = 60;
+            this.ErrorReEnqueueIntervalSecond = 60;
+            this.ExecuteTimeoutSecond = 120;
             this.MaxErrorReTryCount = 5;
             this.CrontabLockSecond = 60;
         }
@@ -63,12 +63,12 @@ namespace Aix.RedisMessageBus
         public int ErrorReEnqueueIntervalSecond { get; set; }
 
         /// <summary>
-        /// 执行超时时间，超过该时间，任务执行错误尝试重试
+        /// 执行超时时间，超过该时间，任务执行错误尝试重试 120秒
         /// </summary>
         public int ExecuteTimeoutSecond { get; set; }
 
         /// <summary>
-        /// 最大错误重试次数 默认10次
+        /// 最大错误重试次数 默认5次
         /// </summary>
         public int MaxErrorReTryCount { get; set; }
 

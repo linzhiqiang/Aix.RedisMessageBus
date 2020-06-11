@@ -3,6 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <ThreadPoolMinThreads>100</ThreadPoolMinThreads>
+    <ThreadPoolMaxThreads>100</ThreadPoolMaxThreads>
   </PropertyGroup>
 
   <ItemGroup>

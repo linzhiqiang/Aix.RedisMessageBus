@@ -113,11 +113,11 @@ namespace Aix.RedisMessageBus.RedisImpl
             }
 
             await _database.HashSetAsync(Helper.GetJobHashId(_options, jobId), new HashEntry[] {
-                     new HashEntry("ExecuteTime",DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")),
+                     new HashEntry("ExecuteTime",DateUtils.GetTimeStamp()),
                      new HashEntry(nameof(JobData.Status),1) //0 待执行，1 执行中，2 成功，9 失败
              });
 
-            byte[] data = await _database.HashGetAsync(Helper.GetJobHashId(_options, jobId), "Data");//取出数据字段
+            byte[] data = await _database.HashGetAsync(Helper.GetJobHashId(_options, jobId), nameof(JobData.Data));//取出数据字段
 
             return new FetchJobData { JobId = jobId, Topic = topic, Data = data };
         }
@@ -213,7 +213,8 @@ namespace Aix.RedisMessageBus.RedisImpl
                 CrontabExpression = dict.ContainsKey(nameof(CrontabJobData.CrontabExpression)) ? dict[nameof(CrontabJobData.CrontabExpression)] : RedisValue.EmptyString,
                 Data = dict.ContainsKey(nameof(CrontabJobData.Data)) ? dict[nameof(CrontabJobData.Data)] : RedisValue.Null,
                 Topic = dict.ContainsKey(nameof(CrontabJobData.Topic)) ? dict[nameof(CrontabJobData.Topic)] : RedisValue.EmptyString,
-                LastExecuteTime = dict.ContainsKey(nameof(CrontabJobData.LastExecuteTime)) ? dict[nameof(CrontabJobData.LastExecuteTime)] : RedisValue.EmptyString,
+                LastExecuteTime = NumberUtils.ToLong(dict.GetValue(nameof(CrontabJobData.LastExecuteTime)))
+                //  dict.ContainsKey(nameof(CrontabJobData.LastExecuteTime)) ? dict[nameof(CrontabJobData.LastExecuteTime)] : RedisValue.EmptyString,
             };
             if (string.IsNullOrEmpty(result.JobId)) result = null;
             return result;
@@ -244,7 +245,7 @@ namespace Aix.RedisMessageBus.RedisImpl
             return trans.ExecuteAsync();
         }
 
-        public Task SetJobCheckedTime(string topic, string jobId, string checkedTime)
+        public Task SetJobCheckedTime(string topic, string jobId, long checkedTime)
         {
             return _database.HashSetAsync(Helper.GetJobHashId(_options, jobId), nameof(JobData.CheckedTime), checkedTime);
         }
@@ -262,8 +263,8 @@ namespace Aix.RedisMessageBus.RedisImpl
 
             trans.ListRemoveAsync(Helper.GetProcessingQueueName(topic), jobId);
             trans.HashSetAsync(Helper.GetJobHashId(_options, jobId), new HashEntry[] {
-                     new HashEntry(nameof(JobData.ExecuteTime),""),
-                     new HashEntry(nameof(JobData.CheckedTime),""),
+                     new HashEntry(nameof(JobData.ExecuteTime),0),
+                     new HashEntry(nameof(JobData.CheckedTime),0),
                      new HashEntry(nameof(JobData.Status),0) //0 待执行，1 执行中，2 成功，9 失败
              });
             if (delay <= TimeSpan.Zero)
@@ -288,13 +289,13 @@ namespace Aix.RedisMessageBus.RedisImpl
             JobData result = new JobData
             {
                 JobId = dict.GetValue(nameof(JobData.JobId)),
-                CreateTime = DateUtils.ToDateTime(dict.GetValue(nameof(JobData.CreateTime))),
+                CreateTime = NumberUtils.ToLong(dict.GetValue(nameof(JobData.CreateTime))),
                 Data = dict.GetValue(nameof(JobData.Data)),
-                ExecuteTime = DateUtils.ToDateTimeNullable(dict.GetValue(nameof(JobData.ExecuteTime))),
+                ExecuteTime = NumberUtils.ToLong(dict.GetValue(nameof(JobData.ExecuteTime))),
                 Topic = dict.GetValue(nameof(JobData.Topic)),
                 Status = NumberUtils.ToInt(dict.GetValue(nameof(JobData.Status))),
-                ErrorCount = dict.ContainsKey(nameof(JobData.ErrorCount)) ? NumberUtils.ToInt(dict[nameof(JobData.ErrorCount)]) : 0,
-                CheckedTime = DateUtils.ToDateTimeNullable(dict.GetValue(nameof(JobData.CheckedTime)))
+                ErrorCount = NumberUtils.ToInt(dict.GetValue(nameof(JobData.ErrorCount))),
+                CheckedTime = NumberUtils.ToLong(dict.GetValue(nameof(JobData.CheckedTime))),
             };
 
             if (string.IsNullOrEmpty(result.JobId))
@@ -304,13 +305,15 @@ namespace Aix.RedisMessageBus.RedisImpl
             return result;
         }
 
-        public async Task ClearJobDataIfNotExists(string jobId)
+        public async Task<bool> ClearJobDataIfNotExists(string jobId)
         {
             var value = await _database.HashGetAsync(Helper.GetJobHashId(_options, jobId), nameof(JobData.JobId));
             if (value.HasValue == false)
             {
                 await _database.KeyDeleteAsync(Helper.GetJobHashId(_options, jobId));
+                return true;
             }
+            return false;
         }
 
         public void WaitForJob(TimeSpan timeSpan, CancellationToken cancellationToken = default(CancellationToken))

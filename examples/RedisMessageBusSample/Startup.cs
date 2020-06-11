@@ -3,6 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RedisMessageBusSample.HostedService;
+using System;
+using System.Threading.Tasks;
 
 namespace RedisMessageBusSample
 {
@@ -14,6 +16,12 @@ namespace RedisMessageBusSample
             services.AddSingleton(options);
 
             var redisMessageBusOptions = context.Configuration.GetSection("redis-messagebus").Get<RedisMessageBusOptions>();
+            redisMessageBusOptions.IsRetry = ex =>
+            {
+                if (ex is Exception)
+                    return Task.FromResult(true);
+                return Task.FromResult(false);
+            };
             services.AddRedisMessageBus(redisMessageBusOptions); //list实现
                                                                  //services.AddRedisMessageBusPubSub(redisMessageBusOptions);//发布订阅实现
 

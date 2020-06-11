@@ -35,17 +35,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
         }
         public async Task Execute(BackgroundProcessContext context)
         {
-            FetchJobData jobData = null;
-            try
-            {
-                jobData = await _redisStorage.FetchNextJob(this._topic);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "redis获取任务失败");
-                await Task.Delay(TimeSpan.FromSeconds(10));
-            }
-
+            FetchJobData jobData = await _redisStorage.FetchNextJob(this._topic);
             if (jobData == null)
             {
                 _redisStorage.WaitForJob(TimeSpan.FromSeconds(1));

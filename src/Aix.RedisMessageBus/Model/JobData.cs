@@ -1,4 +1,5 @@
-﻿using StackExchange.Redis;
+﻿using Aix.RedisMessageBus.Utils;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,7 +13,7 @@ namespace Aix.RedisMessageBus.Model
             return new JobData
             {
                 Data = data,
-                CreateTime = DateTime.Now,
+                CreateTime = DateUtils.GetTimeStamp(),
                 Topic = topic
             };
         }
@@ -26,14 +27,14 @@ namespace Aix.RedisMessageBus.Model
         /// <summary>
         /// 创建时间
         /// </summary>
-        public DateTime CreateTime { get; set; }
+        public long CreateTime { get; set; }
 
         /// <summary>
         /// 业务数据
         /// </summary>
         public byte[] Data { get; set; }
 
-        public DateTime? ExecuteTime { get; set; }
+        public long ExecuteTime { get; set; }
 
         /// <summary>
         /// 0 待执行，1 执行中，2 成功，9 失败
@@ -44,30 +45,30 @@ namespace Aix.RedisMessageBus.Model
 
         public string Topic { get; set; }
 
-        public DateTime? CheckedTime { get; set; }
+        public long CheckedTime { get; set; }
 
         public List<HashEntry> ToDictionary()
         {
             var result = new List<HashEntry>
             {
                 new HashEntry("JobId",JobId),
-                new HashEntry("CreateTime",TimeToString(CreateTime)),
-                new HashEntry("ExecuteTime", TimeToString(ExecuteTime)),
+                new HashEntry("CreateTime",CreateTime),
+                new HashEntry("ExecuteTime", ExecuteTime),
                 new HashEntry("Data",Data),
                 new HashEntry("Status",Status),
                 new HashEntry("ErrorCount",ErrorCount),
                 new HashEntry("Topic",Topic),
-                new HashEntry("CheckedTime", TimeToString(CheckedTime))
+                new HashEntry("CheckedTime", CheckedTime)
             };
 
             return result;
         }
 
-        private static string TimeToString(DateTime? time)
-        {
-            if (time != null) return time.Value.ToString("yyyy-MM-dd HH:mm:ss");
-            return string.Empty;
-        }
+        //private static string TimeToString(DateTime? time)
+        //{
+        //    if (time != null) return time.Value.ToString("yyyy-MM-dd HH:mm:ss fff");
+        //    return string.Empty;
+        //}
 
     }
 }

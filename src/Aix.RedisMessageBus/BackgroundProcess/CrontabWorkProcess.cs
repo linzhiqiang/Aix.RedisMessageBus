@@ -4,6 +4,7 @@ using Aix.RedisMessageBus.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NCrontab;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,13 +41,13 @@ namespace Aix.RedisMessageBus.BackgroundProcess
                         if (jobData == null) continue;
 
                         var lastExecuteTime = now;
-                        if (string.IsNullOrEmpty(jobData.LastExecuteTime))
+                        if (jobData.LastExecuteTime == 0)
                         {
                             await _redisStorage.SetCrontabJobExecuteTime(jobId, DateUtils.GetTimeStamp(now));
                         }
                         else
                         {
-                            lastExecuteTime = DateUtils.TimeStampToDateTime(long.Parse(jobData.LastExecuteTime));
+                            lastExecuteTime = DateUtils.TimeStampToDateTime(jobData.LastExecuteTime);
                         }
 
                         var Schedule = ParseCron(jobData.CrontabExpression);

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 
 namespace Aix.RedisMessageBus.BackgroundProcess
 {
@@ -27,7 +28,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
             _backgroundProcessContext = backgroundProcessContext;
         }
 
-        public Task AddProcess(IBackgroundProcess backgroundProcess,string name)
+        public Task AddProcess(IBackgroundProcess backgroundProcess, string name)
         {
             _logger.LogInformation($"开启后台任务：{name}");
             _backgroundProcesses.Add(backgroundProcess);
@@ -54,10 +55,15 @@ namespace Aix.RedisMessageBus.BackgroundProcess
                 {
                     await process.Execute(_backgroundProcessContext); //内部控制异常
                 }
+                catch (RedisException ex)
+                {
+                    _logger.LogError(ex, "redis错误");
+                    await Task.Delay(TimeSpan.FromSeconds(10));
+                }
                 catch (Exception ex)
                 {
                     string errorMsg = $"执行任务{process.GetType().FullName}异常";
-                    _logger.LogError(ex,errorMsg);
+                    _logger.LogError(ex, errorMsg);
                 }
 
             }

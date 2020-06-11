@@ -89,7 +89,8 @@ namespace Aix.RedisMessageBus
             _logger.LogInformation($"订阅[{topic}],threadcount={threadCount}");
 
 
-            Func<MessageResult, Task> action = async message => {
+            Func<MessageResult, Task> action = async message =>
+            {
                 var realObj = _options.Serializer.Deserialize<T>(message.Data);
                 await handler(realObj);
             };
@@ -126,7 +127,6 @@ namespace Aix.RedisMessageBus
                 await _processExecuter.AddProcess(new DelayedWorkProcess(_serviceProvider), "redis延迟任务处理");
                 await _processExecuter.AddProcess(new ErrorWorkerProcess(_serviceProvider), "redis失败任务处理");
                 await _processExecuter.AddProcess(new CrontabWorkProcess(_serviceProvider), "redis定时任务处理");
-
             });
         }
 

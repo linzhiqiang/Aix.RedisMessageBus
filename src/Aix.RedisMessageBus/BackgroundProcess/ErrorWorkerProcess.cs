@@ -1,7 +1,9 @@
 ﻿using Aix.RedisMessageBus.Model;
 using Aix.RedisMessageBus.RedisImpl;
+using Aix.RedisMessageBus.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 using System;
 using System.Threading.Tasks;
 
@@ -63,11 +65,11 @@ namespace Aix.RedisMessageBus.BackgroundProcess
             var end = -1;
             do
             {
-                var list = await _redisStorage.GetErrorJobId(topic, start, end);// -100,-1
+                var list = await _redisStorage.GetErrorJobId(topic, start, end);// -100,-1  //从队列的尾部抓取    -1=最后一个，-2=倒数第二个，...
                 length = list.Length;
-                deleteCount = await ProcessFailedJob(topic, list);
+                deleteCount = await ProcessFailedJob(topic, list);//倒序处理
 
-                end = 0 - ((length - deleteCount) + 1);
+                end = 0 - (length + 1 - deleteCount);
                 start = end - BatchCount + 1;
             }
             while (length > 0);
@@ -96,21 +98,26 @@ namespace Aix.RedisMessageBus.BackgroundProcess
 
                 if (jobData.Status == 0)
                 {
-                    if (jobData.CheckedTime.HasValue == false)
+                    //2种情况 1:在队列拉去之后未改状态之前   2:在队列拉出来之后就服务重启了（状态还是没改）
+
+                    if (jobData.CheckedTime == 0)
                     {
-                        await _redisStorage.SetJobCheckedTime(topic, jobId, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                        await _redisStorage.SetJobCheckedTime(topic, jobId, DateUtils.GetTimeStamp());
                         await _redisStorage.ClearJobDataIfNotExists(jobId);//防止垃圾数据，SetJobCheckedTime设置一条空数据
                     }
-                    else if(DateTime.Now - jobData.CheckedTime.Value > TimeSpan.FromSeconds(10))
+                    else if ((DateUtils.GetTimeStamp() - jobData.CheckedTime) > TimeSpan.FromSeconds(5).TotalMilliseconds)//一定是重启丢失了，再任务队列拉去完之后，不可能5秒状态还没改成功吧
                     {
                         await _redisStorage.ErrorReEnqueneDelay(topic, jobId, TimeSpan.Zero);
+                        deleteCount++;
                     }
                 }
                 else if (jobData.Status == 1)
                 {
-                    if (jobData.ExecuteTime.HasValue && (DateTime.Now - jobData.ExecuteTime.Value).TotalSeconds > _options.ExecuteTimeoutSecond)
+                    //1：任务执行中  2：任务把状态改为1之后就重启了 3：执行完改状态失败了
+                    if (jobData.ExecuteTime > 0 && (DateUtils.GetTimeStamp() - jobData.ExecuteTime) > _options.ExecuteTimeoutSecond * 1000)//每个job有个超时时间，没有取系统配置
                     {
                         await _redisStorage.ErrorReEnqueneDelay(topic, jobId, TimeSpan.Zero);
+                        deleteCount++;
                     }
                 }
                 else if (jobData.Status == 2)

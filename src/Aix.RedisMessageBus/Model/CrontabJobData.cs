@@ -31,7 +31,7 @@ namespace Aix.RedisMessageBus.Model
         /// <summary>
         /// 执行时间 
         /// </summary>
-        public string LastExecuteTime { get; set; } 
+        public long LastExecuteTime { get; set; } 
 
         public List<HashEntry> ToDictionary()
         {
@@ -42,7 +42,7 @@ namespace Aix.RedisMessageBus.Model
                 new HashEntry("CrontabExpression", CrontabExpression ?? string.Empty),
                 new HashEntry("Data",Data ?? new byte[0]),
                 new HashEntry("Topic",Topic),
-                new HashEntry("LastExecuteTime", LastExecuteTime ?? string.Empty),
+                new HashEntry("LastExecuteTime", LastExecuteTime ),
             };
 
             return result;
