@@ -33,6 +33,11 @@ namespace Aix.RedisMessageBus.Model
         /// </summary>
         public long LastExecuteTime { get; set; } 
 
+        /// <summary>
+        /// 1=启用 0=禁用 
+        /// </summary>
+        public int Status { get; set; }
+
         public List<HashEntry> ToDictionary()
         {
             var result = new List<HashEntry>
@@ -43,9 +48,12 @@ namespace Aix.RedisMessageBus.Model
                 new HashEntry("Data",Data ?? new byte[0]),
                 new HashEntry("Topic",Topic),
                 new HashEntry("LastExecuteTime", LastExecuteTime ),
+                new HashEntry("Status", Status ),
             };
 
             return result;
         }
     }
+
+   
 }

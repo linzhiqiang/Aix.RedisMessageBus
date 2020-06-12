@@ -32,13 +32,19 @@ namespace Aix.RedisMessageBus
             return _subscriber.PublishAsync(GetTopic(messageType), _options.Serializer.Serialize(data));
         }
 
-        public async Task PublishDelayAsync(Type messageType, object message, TimeSpan delay)
+        public Task PublishDelayAsync(Type messageType, object message, TimeSpan delay)
         {
-            await Task.Delay(delay);
-            await this.PublishAsync(messageType, message);
+            throw new NotImplementedException();
+            //await Task.Delay(delay);
+            //await this.PublishAsync(messageType, message);
         }
 
-        public Task SubscribeAsync<T>(Func<T, Task> handler, SubscribeOptions  subscribeOptions=null, CancellationToken cancellationToken = default(CancellationToken)) where T : class
+        public Task PublishCrontabAsync(Type messageType, object message, CrontabJobInfo crontabJobInfo)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SubscribeAsync<T>(Func<T, Task> handler, SubscribeOptions subscribeOptions = null, CancellationToken cancellationToken = default(CancellationToken)) where T : class
         {
             return _subscriber.SubscribeAsync(GetTopic(typeof(T)), (channel, value) =>
             {
@@ -70,6 +76,8 @@ namespace Aix.RedisMessageBus
         {
             return $"{_options.TopicPrefix ?? ""}{type.Name}";
         }
+
+
 
         #endregion
     }

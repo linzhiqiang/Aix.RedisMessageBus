@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>linzhiqiang</Authors>
+    <Description>redis实现messagebus功能
+即时任务
+延时任务
+定时任务</Description>
+    <RepositoryUrl>https://github.com/linzhiqiang/Aix.RedisMessageBus.git</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

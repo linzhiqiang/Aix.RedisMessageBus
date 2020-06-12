@@ -27,6 +27,7 @@ namespace Aix.RedisMessageBus
         /// <returns></returns>
         Task PublishDelayAsync(Type messageType, object message, TimeSpan delay);
 
+
         /// <summary>
         /// 订阅消息 
         /// </summary>

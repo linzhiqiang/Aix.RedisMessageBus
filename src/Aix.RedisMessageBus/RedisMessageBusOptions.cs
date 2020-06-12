@@ -12,14 +12,14 @@ namespace Aix.RedisMessageBus
         private int[] DefaultRetryStrategy = new int[] { 1, 5, 10, 30, 60, 2 * 60, 2 * 60, 2 * 60, 5 * 60, 5 * 60 };
         public RedisMessageBusOptions()
         {
-            this.TopicPrefix = "redis:messagebus:";
+            //this.TopicPrefix = "redis:messagebus:";
             this.Serializer = new MessagePackSerializer();
             this.DataExpireDay = 7;
             this.DefaultConsumerThreadCount = 2;
             this.ErrorReEnqueueIntervalSecond = 60;
             this.ExecuteTimeoutSecond = 120;
             this.MaxErrorReTryCount = 5;
-            this.CrontabLockSecond = 60;
+            this.CrontabIntervalSecond = 60;
         }
 
         /// <summary>
@@ -48,9 +48,9 @@ namespace Aix.RedisMessageBus
         public int DataExpireDay { get; set; }
 
         /// <summary>
-        /// 定时任务锁定时间
+        /// 定时任务锁定时间 默认60秒
         /// </summary>
-        public int CrontabLockSecond { get; set; }
+        public int CrontabIntervalSecond { get; set; }
 
         /// <summary>
         /// 默认每个类型的消费线程数 默认2个
@@ -58,12 +58,12 @@ namespace Aix.RedisMessageBus
         public int DefaultConsumerThreadCount { get; set; }
 
         /// <summary>
-        /// 错误数据重新入队  线程执行间隔
+        /// 错误数据重新入队  线程执行间隔 60秒
         /// </summary>
         public int ErrorReEnqueueIntervalSecond { get; set; }
 
         /// <summary>
-        /// 执行超时时间，超过该时间，任务执行错误尝试重试 120秒
+        /// 执行超时时间，超过该时间，任务存在被重新执行的风险 默认120秒
         /// </summary>
         public int ExecuteTimeoutSecond { get; set; }
 

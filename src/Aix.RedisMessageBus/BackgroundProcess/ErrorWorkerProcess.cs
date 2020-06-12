@@ -20,6 +20,8 @@ namespace Aix.RedisMessageBus.BackgroundProcess
         private RedisStorage _redisStorage;
         int BatchCount = 100; //一次拉取多少条
         private volatile bool _isStart = true;
+
+        private TimeSpan lockTimeSpan = TimeSpan.FromMinutes(1);
         public ErrorWorkerProcess(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
@@ -36,7 +38,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
                 foreach (var topic in context.SubscriberTopics)
                 {
                     var lockKey = $"{_options.TopicPrefix}error:lock";
-                    await _redisStorage.Lock(lockKey, TimeSpan.FromMinutes(1), async () =>
+                    await _redisStorage.Lock(lockKey, lockTimeSpan, async () =>
                     {
                         await ProcessQueue(topic);
                     }, () => Task.CompletedTask);
@@ -58,6 +60,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
 
         private async Task ProcessQueue(string topic)
         {
+            var startProcessTime = DateTime.Now;
             int deleteCount = 0;
             var length = 0;
 
@@ -71,6 +74,11 @@ namespace Aix.RedisMessageBus.BackgroundProcess
 
                 end = 0 - (length + 1 - deleteCount);
                 start = end - BatchCount + 1;
+
+                if (DateTime.Now - startProcessTime >= lockTimeSpan)
+                {
+                    break;
+                }
             }
             while (length > 0);
         }

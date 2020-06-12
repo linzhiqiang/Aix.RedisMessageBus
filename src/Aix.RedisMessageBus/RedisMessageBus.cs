@@ -63,6 +63,8 @@ namespace Aix.RedisMessageBus
 
         public async Task PublishCrontabAsync(Type messageType, object message, CrontabJobInfo crontabJobInfo)
         {
+            var isExsits = await _redisStorage.ExistsCrontabJob(crontabJobInfo.JobId);
+            AssertUtils.IsTrue(isExsits == false, $"该定时任务已存在 jobId={crontabJobInfo.JobId}");
             //传入redis即可
             var crontabJobData = new CrontabJobData
             {
@@ -70,7 +72,8 @@ namespace Aix.RedisMessageBus
                 JobName = crontabJobInfo.JobName,
                 CrontabExpression = crontabJobInfo.CrontabExpression,
                 Data = _options.Serializer.Serialize(message),
-                Topic = GetTopic(messageType)
+                Topic = GetTopic(messageType),
+                Status = (int)crontabJobInfo.Status
             };
             var result = await _redisStorage.EnqueueCrontab(crontabJobData);
             AssertUtils.IsTrue(result, $"redis生产定时任务失败,topic:{crontabJobData.Topic}");
@@ -126,7 +129,7 @@ namespace Aix.RedisMessageBus
             {
                 await _processExecuter.AddProcess(new DelayedWorkProcess(_serviceProvider), "redis延迟任务处理");
                 await _processExecuter.AddProcess(new ErrorWorkerProcess(_serviceProvider), "redis失败任务处理");
-                await _processExecuter.AddProcess(new CrontabWorkProcess(_serviceProvider), "redis定时任务处理");
+               // await _processExecuter.AddProcess(new CrontabWorkProcess(_serviceProvider), "redis定时任务处理");
             });
         }
 

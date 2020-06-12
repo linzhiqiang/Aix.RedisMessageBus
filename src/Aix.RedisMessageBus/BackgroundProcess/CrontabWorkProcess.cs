@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using NCrontab;
 using StackExchange.Redis;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +19,8 @@ namespace Aix.RedisMessageBus.BackgroundProcess
         private ILogger<CrontabWorkProcess> _logger;
         private RedisStorage _redisStorage;
         private RedisMessageBusOptions _options;
+
+        private ConcurrentDictionary<string, CrontabSchedule> CrontabScheduleCache = new ConcurrentDictionary<string, CrontabSchedule>();
         public CrontabWorkProcess(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
@@ -39,6 +42,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
                         var now = DateTime.Now;
                         var jobData = await _redisStorage.GetCrontabJobData(jobId);
                         if (jobData == null) continue;
+                        if (jobData.Status == (int)CrontabJobStatus.Disabled) continue;  //如果设置启用时，要把LastExecuteTime设置为当前时间
 
                         var lastExecuteTime = now;
                         if (jobData.LastExecuteTime == 0)
@@ -69,7 +73,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
             }
             finally
             {
-                var minValue = nextExecuteDelays.Any() ? nextExecuteDelays.Min() : TimeSpan.FromSeconds(_options.CrontabLockSecond).TotalMilliseconds;
+                var minValue = nextExecuteDelays.Any() ? nextExecuteDelays.Min() : TimeSpan.FromSeconds(_options.CrontabIntervalSecond).TotalMilliseconds;
                 var delay = minValue;// Math.Max(minValue, 1000); 
                 _redisStorage.WaitForCrontabJob(TimeSpan.FromMilliseconds(delay), context.CancellationToken);
             }
@@ -81,13 +85,20 @@ namespace Aix.RedisMessageBus.BackgroundProcess
             await _redisStorage.Enqueue(jobData);
         }
 
-        public static CrontabSchedule ParseCron(string cron)
+        public CrontabSchedule ParseCron(string cron)
         {
+            CrontabSchedule result;
+            if (CrontabScheduleCache.TryGetValue(cron, out result))
+            {
+                return result;
+            }
             var options = new CrontabSchedule.ParseOptions
             {
                 IncludingSeconds = cron.Split(' ').Length > 5,
             };
-            return CrontabSchedule.Parse(cron, options);
+            result = CrontabSchedule.Parse(cron, options);
+            CrontabScheduleCache.TryAdd(cron, result);
+            return result;
         }
 
         public static TimeSpan GetNextDueTime(CrontabSchedule Schedule, DateTime LastDueTime, DateTime now)

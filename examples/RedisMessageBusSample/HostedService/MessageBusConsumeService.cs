@@ -23,16 +23,11 @@ namespace RedisMessageBusSample.HostedService
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            Task.Run(async()=> {
-                await Task.Delay(1000);
-                List<Task> taskList = new List<Task>();
+            List<Task> taskList = new List<Task>();
 
-                taskList.Add(Subscribe(cancellationToken));
-                // taskList.Add(SubscribeGroup(cancellationToken));
-
-                await Task.WhenAll(taskList.ToArray());
-            });
-         
+            taskList.Add(Subscribe(cancellationToken));
+            // taskList.Add(SubscribeGroup(cancellationToken));
+            await Task.WhenAll(taskList.ToArray());
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
@@ -48,8 +43,9 @@ namespace RedisMessageBusSample.HostedService
                 await _messageBus.SubscribeAsync<BusinessMessage>(async (message) =>
                 {
                     var current = Interlocked.Increment(ref Count);
+                    await Task.Delay(1000);
                     _logger.LogInformation($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff")}消费--1--数据：MessageId={message.MessageId},Content={message.Content},count={current}");
-                    //await Task.Delay(10000);
+                   
                     // throw new Exception("333");
                     await Task.CompletedTask;
                 }, null, cancellationToken);

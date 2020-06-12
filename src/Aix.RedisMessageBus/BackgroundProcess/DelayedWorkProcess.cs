@@ -19,6 +19,8 @@ namespace Aix.RedisMessageBus.BackgroundProcess
         private RedisStorage _redisStorage;
         int BatchCount = 100; //一次拉取多少条
         private volatile bool _isStart = true;
+
+        private TimeSpan lockTimeSpan = TimeSpan.FromMinutes(1);
         public DelayedWorkProcess(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
@@ -37,7 +39,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
         {
             var lockKey = $"{_options.TopicPrefix}delay:lock";
             long delay = 1000; //毫秒
-            await _redisStorage.Lock(lockKey, TimeSpan.FromMinutes(1), async () =>
+            await _redisStorage.Lock(lockKey, lockTimeSpan, async () =>
             {
                 var now = DateTime.Now;
                 var maxScore = DateUtils.GetTimeStamp(now);

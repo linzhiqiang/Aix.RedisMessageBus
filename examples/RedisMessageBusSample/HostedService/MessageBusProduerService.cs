@@ -56,9 +56,15 @@ namespace RedisMessageBusSample.HostedService
                             Content = $"我是内容_{i}",
                             CreateTime = DateTime.Now
                         };
-                       await _messageBus.PublishAsync(messageData);
+                        await _messageBus.PublishAsync(messageData);
                         //await _messageBus.PublishDelayAsync(messageData,TimeSpan.FromSeconds(8));
-                        //await _messageBus.PublishCrontabAsync(messageData, new CrontabJobInfo {  JobId="1", JobName="定时统计商品", CrontabExpression= "0/5 * * * * ? *" });
+                        //await _messageBus.PublishCrontabAsync(messageData, new CrontabJobInfo
+                        //{
+                        //    JobId = "1",
+                        //    JobName = "定时统计商品",
+                        //    CrontabExpression = "0/1 * * * * *",
+                        //    Status = CrontabJobStatus.Enabled
+                        //});
                         _logger.LogInformation($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff")}生产数据：MessageId={messageData.MessageId}");
 
                     }

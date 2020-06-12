@@ -77,6 +77,12 @@ namespace Aix.RedisMessageBus.RedisImpl
             return Task.FromResult(result);
         }
 
+        public Task<bool> ExistsCrontabJob(string crontabJobId)
+        {
+            var hashId = Helper.GetCrontabHashId(_options, crontabJobId);
+            return _database.HashExistsAsync(hashId, nameof(CrontabJobData.JobId));
+        }
+
         public Task<bool> EnqueueCrontab(CrontabJobData crontabJobData)
         {
             var values = crontabJobData.ToDictionary();
@@ -213,7 +219,9 @@ namespace Aix.RedisMessageBus.RedisImpl
                 CrontabExpression = dict.ContainsKey(nameof(CrontabJobData.CrontabExpression)) ? dict[nameof(CrontabJobData.CrontabExpression)] : RedisValue.EmptyString,
                 Data = dict.ContainsKey(nameof(CrontabJobData.Data)) ? dict[nameof(CrontabJobData.Data)] : RedisValue.Null,
                 Topic = dict.ContainsKey(nameof(CrontabJobData.Topic)) ? dict[nameof(CrontabJobData.Topic)] : RedisValue.EmptyString,
-                LastExecuteTime = NumberUtils.ToLong(dict.GetValue(nameof(CrontabJobData.LastExecuteTime)))
+                LastExecuteTime = NumberUtils.ToLong(dict.GetValue(nameof(CrontabJobData.LastExecuteTime))),
+                Status = NumberUtils.ToInt(dict.GetValue(nameof(CrontabJobData.Status)))
+
                 //  dict.ContainsKey(nameof(CrontabJobData.LastExecuteTime)) ? dict[nameof(CrontabJobData.LastExecuteTime)] : RedisValue.EmptyString,
             };
             if (string.IsNullOrEmpty(result.JobId)) result = null;

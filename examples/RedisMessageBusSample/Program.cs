@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NCrontab;
 using System;
 
 namespace RedisMessageBusSample
@@ -18,6 +19,17 @@ namespace RedisMessageBusSample
             {
                 setting.CaseSensitive = false;
             });
+
+            var cron = "0/5 * * * * *";
+            var options = new CrontabSchedule.ParseOptions
+            {
+                IncludingSeconds = cron.Split(' ').Length > 5,
+            };
+            var result = CrontabSchedule.Parse(cron, options);
+            var now = DateTime.Now;
+            var r1 = result.GetNextOccurrence(now.AddHours(-1));
+            var r2 = result.GetNextOccurrence(now.AddHours(-1), now);
+
             parser.ParseArguments<CmdOptions>(args).WithParsed((options) =>
             {
                 CmdOptions.Options = options;
