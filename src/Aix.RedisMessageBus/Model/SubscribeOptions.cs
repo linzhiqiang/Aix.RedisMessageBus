@@ -12,7 +12,7 @@ namespace Aix.RedisMessageBus.Model
         /// <summary>
         /// 分组 默认取全局配置
         /// </summary>
-        public string GroupId { get; set; }
+       // public string GroupId { get; set; }
 
         /// <summary>
         /// 消费者线程数 默认取全局配置

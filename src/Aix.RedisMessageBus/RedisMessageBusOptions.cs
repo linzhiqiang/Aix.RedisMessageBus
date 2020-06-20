@@ -9,14 +9,14 @@ namespace Aix.RedisMessageBus
 {
     public class RedisMessageBusOptions
     {
-        private int[] DefaultRetryStrategy = new int[] { 1, 5, 10, 30, 60, 2 * 60, 2 * 60, 2 * 60, 5 * 60, 5 * 60 };
+        private int[] DefaultRetryStrategy = new int[] { 1, 10, 30, 60, 2 * 60, 2 * 60, 2 * 60, 5 * 60, 5 * 60,10*60 };
         public RedisMessageBusOptions()
         {
             //this.TopicPrefix = "redis:messagebus:";
             this.Serializer = new MessagePackSerializer();
             this.DataExpireDay = 7;
-            this.DefaultConsumerThreadCount = 2;
-            this.ErrorReEnqueueIntervalSecond = 60;
+            this.DefaultConsumerThreadCount = 4;
+            this.ErrorReEnqueueIntervalSecond = 30;
             this.ExecuteTimeoutSecond = 120;
             this.MaxErrorReTryCount = 5;
             this.CrontabIntervalSecond = 60;
@@ -53,12 +53,12 @@ namespace Aix.RedisMessageBus
         public int CrontabIntervalSecond { get; set; }
 
         /// <summary>
-        /// 默认每个类型的消费线程数 默认2个
+        /// 默认每个类型的消费线程数 默认4个
         /// </summary>
         public int DefaultConsumerThreadCount { get; set; }
 
         /// <summary>
-        /// 错误数据重新入队  线程执行间隔 60秒
+        /// 错误数据重新入队  线程执行间隔 30秒
         /// </summary>
         public int ErrorReEnqueueIntervalSecond { get; set; }
 
@@ -73,7 +73,7 @@ namespace Aix.RedisMessageBus
         public int MaxErrorReTryCount { get; set; }
 
         /// <summary>
-        /// 失败重试延迟策略 单位：秒 ,不要直接调用请调用GetRetryStrategy()  默认失败次数对应值延迟时间[ 1,5, 10, 30,  60,  60, 2 * 60, 2 * 60, 5 * 60, 5 * 60  ];
+        /// 失败重试延迟策略 单位：秒 ,不要直接调用请调用GetRetryStrategy()  默认失败次数对应值延迟时间[ 1, 10, 30, 60, 2 * 60, 2 * 60, 2 * 60, 5 * 60, 5 * 60,10*60   ];
         /// </summary>
         public int[] RetryStrategy { get; set; }
 

@@ -19,7 +19,7 @@ namespace Aix.RedisMessageBus
         Task PublishAsync(Type messageType, object message);
 
         /// <summary>
-        /// 发布延迟消息 kafka未实现,rabbitmq已实现,redis已实现
+        /// 发布延迟消息
         /// </summary>
         /// <param name="messageType"></param>
         /// <param name="message"></param>

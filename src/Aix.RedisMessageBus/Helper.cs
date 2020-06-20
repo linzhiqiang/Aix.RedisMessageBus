@@ -25,6 +25,11 @@ namespace Aix.RedisMessageBus
             return $"{options.TopicPrefix}QueueJobChannel";
         }
 
+        public static string GetDelayChannel(RedisMessageBusOptions options)
+        {
+            return $"{options.TopicPrefix}DelayJobChannel";
+        }
+
         public static string GetErrorChannel(RedisMessageBusOptions options)
         {
             return $"{options.TopicPrefix}ErrorJobChannel";

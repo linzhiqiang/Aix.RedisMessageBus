@@ -26,7 +26,7 @@ namespace RedisMessageBusSample.HostedService
             List<Task> taskList = new List<Task>();
 
             taskList.Add(Subscribe(cancellationToken));
-            // taskList.Add(SubscribeGroup(cancellationToken));
+            taskList.Add(SubscribeWithOptions(cancellationToken));
             await Task.WhenAll(taskList.ToArray());
         }
 
@@ -43,10 +43,10 @@ namespace RedisMessageBusSample.HostedService
                 await _messageBus.SubscribeAsync<BusinessMessage>(async (message) =>
                 {
                     var current = Interlocked.Increment(ref Count);
-                    await Task.Delay(1000);
+                    //await Task.Delay(1000);
                     _logger.LogInformation($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff")}消费--1--数据：MessageId={message.MessageId},Content={message.Content},count={current}");
                    
-                    // throw new Exception("333");
+                    throw new Exception("333");
                     await Task.CompletedTask;
                 }, null, cancellationToken);
             }
@@ -56,16 +56,15 @@ namespace RedisMessageBusSample.HostedService
             }
         }
 
-        private async Task SubscribeGroup(CancellationToken cancellationToken)
+        private async Task SubscribeWithOptions(CancellationToken cancellationToken)
         {
             try
             {
                 //订阅配置可以灵活的增加参数 支持参数如下
                 SubscribeOptions subscribeOptions = new SubscribeOptions();
-                subscribeOptions.GroupId = "group2";
                 subscribeOptions.ConsumerThreadCount = 2;
 
-                await _messageBus.SubscribeAsync<BusinessMessage>(async (message) =>
+                await _messageBus.SubscribeAsync<BusinessMessage2>(async (message) =>
                 {
                     var current = Interlocked.Increment(ref Count);
                     _logger.LogInformation($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff")}消费--2--数据：MessageId={message.MessageId},Content={message.Content},count={current}");

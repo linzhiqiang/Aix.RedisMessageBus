@@ -148,6 +148,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
 
         private int GetDelaySecond(int errorCount)
         {
+            errorCount = errorCount > 0 ? errorCount - 1 : errorCount;
             var retryStrategy = _options.GetRetryStrategy();
             if (errorCount < retryStrategy.Length)
             {
