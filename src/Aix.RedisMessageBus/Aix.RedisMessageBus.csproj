@@ -9,6 +9,7 @@
 延时任务
 定时任务</Description>
     <RepositoryUrl>https://github.com/linzhiqiang/Aix.RedisMessageBus.git</RepositoryUrl>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
