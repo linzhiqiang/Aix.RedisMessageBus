@@ -38,10 +38,10 @@ namespace Aix.RedisMessageBus.BackgroundProcess
             FetchJobData jobData = await _redisStorage.FetchNextJob(this._topic);
             if (jobData == null)
             {
-                _redisStorage.WaitForJob(TimeSpan.FromSeconds(1));
+                _redisStorage.WaitForJob(TimeSpan.FromSeconds(1), context.CancellationToken);
                 return;
             }
-
+            if (context.IsShutdownRequested) return;
             var isSuccess = await DoWork(jobData);
             if (isSuccess)
             {

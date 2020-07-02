@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Aix.RedisMessageBus
 {
-    public class RedisMessageBus : IMessageBus
+    public class RedisMessageBus : IRedisMessageBus
     {
         private IServiceProvider _serviceProvider;
         private ILogger<RedisMessageBus> _logger;

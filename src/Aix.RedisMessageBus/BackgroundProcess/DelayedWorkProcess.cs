@@ -46,6 +46,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
                 var list = await _redisStorage.GetTopDueDealyJobId(maxScore + 1000, BatchCount); //多查询1秒的数据，便于精确控制延迟
                 foreach (var item in list)
                 {
+                    if (context.IsShutdownRequested) return;
                     if (_isStart == false) return;//已经关闭了 就直接返回吧
                     if (item.Value > maxScore)
                     {
@@ -66,7 +67,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
 
             if (delay > 0)
             {
-                await Task.Delay(Math.Min((int)delay, 1000));
+                await Task.Delay(Math.Min((int)delay, 1000), context.CancellationToken);
             }
         }
     }

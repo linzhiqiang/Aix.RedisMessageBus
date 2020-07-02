@@ -18,7 +18,7 @@ namespace Aix.RedisMessageBus.RedisImpl
         private readonly RedisSubscription _queueJobChannelSubscription;
         private readonly RedisSubscription _errorJobChannelSubscription;
         private readonly RedisSubscription _crontabJobChannelSubscription;
-        private readonly RedisSubscription _delayJobChannelSubscription;
+        //private readonly RedisSubscription _delayJobChannelSubscription;
         public RedisStorage(IServiceProvider serviceProvider, ConnectionMultiplexer redis, RedisMessageBusOptions options)
         {
             _serviceProvider = serviceProvider;

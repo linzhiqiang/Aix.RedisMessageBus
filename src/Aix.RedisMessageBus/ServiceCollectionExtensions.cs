@@ -10,14 +10,14 @@ namespace Aix.RedisMessageBus
         public static IServiceCollection AddRedisMessageBus(this IServiceCollection services, RedisMessageBusOptions options)
         {
             AddService(services, options);
-            services.AddSingleton<IMessageBus, RedisMessageBus>();
+            services.AddSingleton<IRedisMessageBus, RedisMessageBus>();
             return services;
         }
 
         public static IServiceCollection AddRedisMessageBusPubSub(this IServiceCollection services, RedisMessageBusOptions options)
         {
             AddService(services, options);
-            services.AddSingleton<IMessageBus, RedisMessageBus_Subscriber>();
+            services.AddSingleton<IRedisMessageBus, RedisMessageBus_Subscriber>();
             return services;
         }
 

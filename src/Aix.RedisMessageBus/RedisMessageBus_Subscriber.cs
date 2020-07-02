@@ -11,7 +11,7 @@ namespace Aix.RedisMessageBus
     /// <summary>
     /// 发布订阅实现
     /// </summary>
-    public class RedisMessageBus_Subscriber : IMessageBus
+    public class RedisMessageBus_Subscriber : IRedisMessageBus
     {
         private ILogger<RedisMessageBus_Subscriber> _logger;
         private RedisMessageBusOptions _options;

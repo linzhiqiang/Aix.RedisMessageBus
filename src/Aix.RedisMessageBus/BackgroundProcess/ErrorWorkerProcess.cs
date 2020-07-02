@@ -40,7 +40,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
                     var lockKey = $"{_options.TopicPrefix}error:lock";
                     await _redisStorage.Lock(lockKey, lockTimeSpan, async () =>
                     {
-                        await ProcessQueue(topic);
+                        await ProcessQueue(topic, context);
                     }, () => Task.CompletedTask);
                 }
             }
@@ -48,7 +48,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
             {
                 //await Task.Delay(_options.ErrorReEnqueueIntervalSecond * 1000);
                 var waitTime = TimeSpan.FromSeconds(_options.ErrorReEnqueueIntervalSecond);
-                _redisStorage.WaitForErrorJob(waitTime);
+                _redisStorage.WaitForErrorJob(waitTime, context.CancellationToken);
             }
         }
 
@@ -58,7 +58,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
             _logger.LogInformation("关闭后台任务：redis失败任务处理");
         }
 
-        private async Task ProcessQueue(string topic)
+        private async Task ProcessQueue(string topic, BackgroundProcessContext context)
         {
             var startProcessTime = DateTime.Now;
             int deleteCount = 0;
@@ -70,6 +70,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
             {
                 var list = await _redisStorage.GetErrorJobId(topic, start, end);// -100,-1  //从队列的尾部抓取    -1=最后一个，-2=倒数第二个，...
                 length = list.Length;
+                if (context.IsShutdownRequested) return;
                 deleteCount = await ProcessFailedJob(topic, list);//倒序处理
 
                 end = 0 - (length + 1 - deleteCount);

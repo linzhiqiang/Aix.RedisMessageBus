@@ -39,6 +39,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
                     var list = await _redisStorage.GetAllCrontabJobId();
                     foreach (var jobId in list)
                     {
+                        if (context.IsShutdownRequested) return;
                         var now = DateTime.Now;
                         var jobData = await _redisStorage.GetCrontabJobData(jobId);
                         if (jobData == null) continue;
