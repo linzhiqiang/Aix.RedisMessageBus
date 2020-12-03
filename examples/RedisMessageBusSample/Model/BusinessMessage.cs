@@ -3,7 +3,7 @@ using System;
 
 namespace RedisMessageBusSample
 {
-    [TopicAttribute(Name = "BusinessMessage")]
+    [TopicAttribute(Name = "BusinessMessageList")]
     public class BusinessMessage
     {
        // [RouteKeyAttribute]
@@ -13,7 +13,7 @@ namespace RedisMessageBusSample
         public DateTime CreateTime { get; set; }
     }
 
-    [TopicAttribute(Name = "BusinessMessage2")]
+    [TopicAttribute(Name = "BusinessMessage2List")]
     public class BusinessMessage2
     {
         public string MessageId { get; set; }

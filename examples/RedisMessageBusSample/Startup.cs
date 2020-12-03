@@ -19,8 +19,8 @@ namespace RedisMessageBusSample
             var redisMessageBusOptions = context.Configuration.GetSection("redis-messagebus").Get<RedisMessageBusOptions>();
             redisMessageBusOptions.IsRetry = ex =>
             {
-                if (typeof(BizException) != ex.GetType())
-                    return Task.FromResult(true);
+                //if (typeof(BizException) != ex.GetType())
+                //    return Task.FromResult(true);
                 return Task.FromResult(false);
             };
             services.AddRedisMessageBus(redisMessageBusOptions); //list实现
