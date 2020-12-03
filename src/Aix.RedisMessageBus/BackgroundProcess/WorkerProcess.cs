@@ -64,7 +64,9 @@ namespace Aix.RedisMessageBus.BackgroundProcess
             var isSuccess = true;
             try
             {
-                await OnMessage(messageResult);
+                var task = OnMessage(messageResult);
+
+                await task.TimeoutAfter(TimeSpan.FromSeconds(_options.ExecuteTimeoutSecond));
             }
             catch (Exception ex)
             {

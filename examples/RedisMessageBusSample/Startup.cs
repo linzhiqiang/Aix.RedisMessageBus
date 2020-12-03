@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RedisMessageBusSample.HostedService;
+using RedisMessageBusSample.Model;
 using System;
 using System.Threading.Tasks;
 
@@ -18,7 +19,7 @@ namespace RedisMessageBusSample
             var redisMessageBusOptions = context.Configuration.GetSection("redis-messagebus").Get<RedisMessageBusOptions>();
             redisMessageBusOptions.IsRetry = ex =>
             {
-                if (ex is Exception)
+                if (typeof(BizException) != ex.GetType())
                     return Task.FromResult(true);
                 return Task.FromResult(false);
             };

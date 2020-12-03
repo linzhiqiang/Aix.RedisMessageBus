@@ -123,7 +123,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
                 else if (jobData.Status == 1)
                 {
                     //1：任务执行中  2：任务把状态改为1之后就重启了 3：执行完改状态失败了
-                    if (jobData.ExecuteTime > 0 && (DateUtils.GetTimeStamp() - jobData.ExecuteTime) > _options.ExecuteTimeoutSecond * 1000)//每个job有个超时时间，没有取系统配置
+                    if (jobData.ExecuteTime > 0 && (DateUtils.GetTimeStamp() - jobData.ExecuteTime) > (_options.ExecuteTimeoutSecond+5) * 1000)//每个job有个超时时间，没有取系统配置
                     {
                         await _redisStorage.ErrorReEnqueneDelay(topic, jobId, TimeSpan.Zero);
                         deleteCount++;
