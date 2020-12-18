@@ -68,6 +68,11 @@ namespace Aix.RedisMessageBus.BackgroundProcess
 
                 await task.TimeoutAfter(TimeSpan.FromSeconds(_options.ExecuteTimeoutSecond));
             }
+            catch (TimeoutException ex) //超时
+            {
+                _logger.LogWarning(ex, $"redis消费超时,topic:{fetchJobData.Topic}");
+                isSuccess = true;//超时不重试
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"redis消费失败,topic:{fetchJobData.Topic}");
