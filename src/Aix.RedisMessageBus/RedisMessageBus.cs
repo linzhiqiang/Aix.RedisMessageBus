@@ -34,7 +34,7 @@ namespace Aix.RedisMessageBus
             _options = options;
             _redisStorage = redisStorage;
 
-            backgroundProcessContext = new BackgroundProcessContext(default(CancellationToken));
+            backgroundProcessContext = new BackgroundProcessContext();
             _processExecuter = new ProcessExecuter(_serviceProvider, backgroundProcessContext);
 
         }

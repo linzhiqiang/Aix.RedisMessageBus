@@ -7,9 +7,9 @@
     <Description>redis实现messagebus功能
 即时任务
 延时任务
-定时任务</Description>
+</Description>
     <RepositoryUrl>https://github.com/linzhiqiang/Aix.RedisMessageBus.git</RepositoryUrl>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
     <PackageReleaseNotes>redis 实现messagebug</PackageReleaseNotes>
   </PropertyGroup>
 

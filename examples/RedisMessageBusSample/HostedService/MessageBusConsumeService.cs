@@ -66,7 +66,7 @@ namespace RedisMessageBusSample.HostedService
 
                 await _messageBus.SubscribeAsync<BusinessMessage2>(async (message) =>
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(7));
+                    //await Task.Delay(TimeSpan.FromSeconds(7));
                     var current = Interlocked.Increment(ref Count);
                     _logger.LogInformation($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff")}消费--2--数据：MessageId={message.MessageId},Content={message.Content},count={current}");
                     await Task.CompletedTask;

@@ -40,6 +40,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
         public Task Close()
         {
             this._isStart = false;
+            _backgroundProcessContext.Stop();
             foreach (var item in _backgroundProcesses)
             {
                 item.Dispose();
@@ -49,22 +50,33 @@ namespace Aix.RedisMessageBus.BackgroundProcess
 
         private async Task RunProcess(IBackgroundProcess process)
         {
-            while (_isStart && !_backgroundProcessContext.IsShutdownRequested)
+            try
             {
-                try
+                while (_isStart && !_backgroundProcessContext.IsShutdownRequested)
                 {
-                    await process.Execute(_backgroundProcessContext); //内部控制异常
+                    try
+                    {
+                        await process.Execute(_backgroundProcessContext); //内部控制异常
+                    }
+                    catch (TaskCanceledException)
+                    {
+                    }
+                    catch (RedisException ex)
+                    {
+                        _logger.LogError(ex, "redis错误");
+                        await Task.Delay(TimeSpan.FromSeconds(10), _backgroundProcessContext.CancellationToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        string errorMsg = $"执行任务{process.GetType().FullName}异常";
+                        _logger.LogError(ex, errorMsg);
+                    }
+
                 }
-                catch (RedisException ex)
-                {
-                    _logger.LogError(ex, "redis错误");
-                    await Task.Delay(TimeSpan.FromSeconds(10));
-                }
-                catch (Exception ex)
-                {
-                    string errorMsg = $"执行任务{process.GetType().FullName}异常";
-                    _logger.LogError(ex, errorMsg);
-                }
+
+            }
+            catch (Exception)
+            {
 
             }
         }
