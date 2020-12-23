@@ -1,4 +1,5 @@
-﻿using Aix.RedisMessageBus.RedisImpl;
+﻿using Aix.RedisMessageBus.Foundation;
+using Aix.RedisMessageBus.RedisImpl;
 using Aix.RedisMessageBus.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -67,7 +68,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
 
             if (delay > 0)
             {
-                await Task.Delay(Math.Min((int)delay, 1000), context.CancellationToken);
+                await TaskEx.DelayNoException(Math.Min((int)delay, 1000), context.CancellationToken);
             }
         }
     }
