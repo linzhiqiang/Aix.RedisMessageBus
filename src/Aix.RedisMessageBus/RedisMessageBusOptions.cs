@@ -9,7 +9,7 @@ namespace Aix.RedisMessageBus
 {
     public class RedisMessageBusOptions
     {
-        private int[] DefaultRetryStrategy = new int[] { 1, 10, 30, 60, 2 * 60, 2 * 60, 2 * 60, 5 * 60, 5 * 60,10*60 };
+        private int[] DefaultRetryStrategy = new int[] { 1, 10, 30, 60, 2 * 60, 2 * 60, 2 * 60, 5 * 60, 5 * 60, 10 * 60 };
         public RedisMessageBusOptions()
         {
             //this.TopicPrefix = "redis:messagebus:";
@@ -56,6 +56,11 @@ namespace Aix.RedisMessageBus
         /// 默认每个类型的消费线程数 默认4个
         /// </summary>
         public int DefaultConsumerThreadCount { get; set; }
+
+        /// <summary>
+        /// 延迟任务预处数据时间 建议[1,5]，也是延迟任务最低粒度
+        /// </summary>
+        public int DelayTaskPreReadSecond { get; set; } = 1;
 
         /// <summary>
         /// 错误数据重新入队  线程执行间隔 30秒
