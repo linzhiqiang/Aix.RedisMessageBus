@@ -45,30 +45,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
                         if (jobData == null) continue;
                         if (jobData.Status == (int)CrontabJobStatus.Disabled) continue;  //如果设置启用时，要把LastExecuteTime设置为当前时间
 
-                        var lastExecuteTime = now;
-                        if (jobData.LastExecuteTime == 0)
-                        {
-                            await _redisStorage.SetCrontabJobExecuteTime(jobId, DateUtils.GetTimeStamp(now));
-                        }
-                        else
-                        {
-                            lastExecuteTime = DateUtils.TimeStampToDateTime(jobData.LastExecuteTime);
-                        }
-
-                        var Schedule = ParseCron(jobData.CrontabExpression);
-                        var nextExecuteTimeSpan = GetNextDueTime(Schedule, lastExecuteTime, now);
-
-                        if (nextExecuteTimeSpan.TotalMilliseconds <= 0)
-                        {
-                            var executeTime = DateTime.Now;
-                            await _redisStorage.SetCrontabJobExecuteTime(jobId, DateUtils.GetTimeStamp(executeTime));
-
-                            //await BackgroundJobClient.Instance.AddJob(jobData.Data, jobData.Queue);//插入普通任务队列即可
-                            await Enqueue(jobData);
-                            nextExecuteTimeSpan = GetNextDueTime(Schedule, executeTime, DateTime.Now);
-                        }
-                        nextExecuteDelays.Add(nextExecuteTimeSpan.TotalMilliseconds);
-
+                        //暂未实现
                     }
                 }, () => Task.CompletedTask);
             }

@@ -27,7 +27,7 @@ namespace RedisMessageBusSample.HostedService
                 List<Task> taskList = new List<Task>();
 
                 taskList.Add(Producer(cancellationToken));
-                taskList.Add(Producer2(cancellationToken));
+               // taskList.Add(Producer2(cancellationToken));
                 await Task.WhenAll(taskList.ToArray());
             });
 
@@ -56,7 +56,7 @@ namespace RedisMessageBusSample.HostedService
                             Content = $"我是内容_{i}",
                             CreateTime = DateTime.Now
                         };
-                        await _messageBus.PublishAsync(messageData);
+                       await _messageBus.PublishAsync(messageData);
                         //await _messageBus.PublishDelayAsync(messageData,TimeSpan.FromSeconds(8));
                         //await _messageBus.PublishCrontabAsync(messageData, new CrontabJobInfo
                         //{

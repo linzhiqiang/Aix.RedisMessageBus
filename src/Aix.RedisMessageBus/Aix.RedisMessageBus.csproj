@@ -9,8 +9,8 @@
 延时任务
 </Description>
     <RepositoryUrl>https://github.com/linzhiqiang/Aix.RedisMessageBus.git</RepositoryUrl>
-    <Version>1.0.5</Version>
-    <PackageReleaseNotes>redis 实现messagebug</PackageReleaseNotes>
+    <Version>1.0.6</Version>
+    <PackageReleaseNotes>优化</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

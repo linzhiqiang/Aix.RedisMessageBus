@@ -58,9 +58,14 @@ namespace Aix.RedisMessageBus
         public int DefaultConsumerThreadCount { get; set; }
 
         /// <summary>
-        /// 延迟任务预处数据时间 建议[1,5]，也是延迟任务最低粒度
+        /// 消费者没数据时 间隔时间(没数据时) 默认100毫秒
         /// </summary>
-        public int DelayTaskPreReadSecond { get; set; } = 1;
+        public int ConsumePullIntervalMillisecond { get; set; } = 100;
+
+        /// <summary>
+        /// 延迟任务预处数据时间
+        /// </summary>
+        public int DelayTaskPreReadSecond { get; set; } = 5;
 
         /// <summary>
         /// 错误数据重新入队  线程执行间隔 30秒

@@ -18,7 +18,7 @@ namespace Aix.RedisMessageBus.RedisImpl
         private readonly RedisSubscription _queueJobChannelSubscription;
         private readonly RedisSubscription _errorJobChannelSubscription;
         private readonly RedisSubscription _crontabJobChannelSubscription;
-        //private readonly RedisSubscription _delayJobChannelSubscription;
+        private readonly RedisSubscription _delayJobChannelSubscription;
         public RedisStorage(IServiceProvider serviceProvider, ConnectionMultiplexer redis, RedisMessageBusOptions options)
         {
             _serviceProvider = serviceProvider;
@@ -28,7 +28,7 @@ namespace Aix.RedisMessageBus.RedisImpl
             _queueJobChannelSubscription = new RedisSubscription(_serviceProvider, _redis.GetSubscriber(), Helper.GetQueueJobChannel(_options));
             _errorJobChannelSubscription = new RedisSubscription(_serviceProvider, _redis.GetSubscriber(), Helper.GetErrorChannel(_options));
             _crontabJobChannelSubscription = new RedisSubscription(_serviceProvider, _redis.GetSubscriber(), Helper.GetCrontabChannel(_options));
-            //_delayJobChannelSubscription = new RedisSubscription(_serviceProvider, _redis.GetSubscriber(), Helper.GetDelayChannel(_options));
+            _delayJobChannelSubscription = new RedisSubscription(_serviceProvider, _redis.GetSubscriber(), Helper.GetDelayChannel(_options));
 
         }
 
@@ -51,7 +51,7 @@ namespace Aix.RedisMessageBus.RedisImpl
             trans.HashSetAsync(hashJobId, values.ToArray());
             trans.KeyExpireAsync(hashJobId, TimeSpan.FromDays(_options.DataExpireDay));
             trans.ListLeftPushAsync(topic, jobData.JobId);
-            trans.PublishAsync(_queueJobChannelSubscription.Channel, jobData.JobId);
+            //trans.PublishAsync(_queueJobChannelSubscription.Channel, jobData.JobId); //除非要求实时非常高的 才这么做
 
             var result = trans.Execute();
 
@@ -74,10 +74,10 @@ namespace Aix.RedisMessageBus.RedisImpl
             trans.HashSetAsync(hashJobId, values.ToArray());
             trans.KeyExpireAsync(hashJobId, TimeSpan.FromDays(_options.DataExpireDay));
             trans.SortedSetAddAsync(Helper.GetDelaySortedSetName(_options), jobData.JobId, DateUtils.GetTimeStamp(DateTime.Now.Add(delay))); //当前时间戳，
-            //if (delay <= TimeSpan.FromSeconds(5))
-            //{
-            //    trans.PublishAsync(_delayJobChannelSubscription.Channel, jobData.JobId);
-            //}
+            if (delay < TimeSpan.FromSeconds(_options.DelayTaskPreReadSecond))
+            {
+                trans.PublishAsync(_delayJobChannelSubscription.Channel, jobData.JobId);
+            }
 
             var result = trans.Execute();
 
@@ -345,6 +345,13 @@ namespace Aix.RedisMessageBus.RedisImpl
         {
             _crontabJobChannelSubscription.WaitForJob(timeSpan, cancellationToken);
         }
+
+        public void WaitForDelayJob(TimeSpan timeSpan, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            _delayJobChannelSubscription.WaitForJob(timeSpan, cancellationToken);
+        }
+
+
 
         public async Task Lock(string key, TimeSpan span, Func<Task> action, Func<Task> concurrentCallback = null)
         {

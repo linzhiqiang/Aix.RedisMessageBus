@@ -67,11 +67,13 @@ namespace Aix.RedisMessageBus.BackgroundProcess
                 {
                     delay = PreReadSecond * 1000;
                 }
-            }, async () => await TaskEx.DelayNoException(_options.DelayTaskPreReadSecond * 1000, context.CancellationToken)); //出现并发也休息一会
+            }, async () => await TaskEx.DelayNoException(PreReadSecond * 1000, context.CancellationToken)); //出现并发也休息一会
 
             if (delay > 0)
             {
-                await TaskEx.DelayNoException(Math.Min((int)delay, _options.DelayTaskPreReadSecond * 1000), context.CancellationToken);
+                var minDelay = Math.Min((int)delay, PreReadSecond * 1000);
+                _redisStorage.WaitForDelayJob(TimeSpan.FromMilliseconds(minDelay), context.CancellationToken);
+                //await TaskEx.DelayNoException(Math.Min((int)delay, PreReadSecond * 1000), context.CancellationToken);
             }
         }
     }
