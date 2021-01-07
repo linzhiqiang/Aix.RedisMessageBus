@@ -72,7 +72,7 @@ namespace Aix.RedisMessageBus.RedisImpl
             var trans = _database.CreateTransaction();
 
             trans.HashSetAsync(hashJobId, values.ToArray());
-            trans.KeyExpireAsync(hashJobId, TimeSpan.FromDays(_options.DataExpireDay));
+            //trans.KeyExpireAsync(hashJobId, TimeSpan.FromDays(_options.DataExpireDay));
             trans.SortedSetAddAsync(Helper.GetDelaySortedSetName(_options), jobData.JobId, DateUtils.GetTimeStamp(DateTime.Now.Add(delay))); //当前时间戳，
             if (delay < TimeSpan.FromSeconds(_options.DelayTaskPreReadSecond))
             {
@@ -191,13 +191,15 @@ namespace Aix.RedisMessageBus.RedisImpl
         /// <returns></returns>
         public async Task DueDealyJobEnqueue(string jobId)
         {
-            string topic = await _database.HashGetAsync(Helper.GetJobHashId(_options, jobId), nameof(JobData.Topic));
+            var hashJobId = Helper.GetJobHashId(_options, jobId);
+            string topic = await _database.HashGetAsync(hashJobId, nameof(JobData.Topic));
 
             var trans = _database.CreateTransaction();
 #pragma warning disable CS4014
             trans.ListLeftPushAsync(topic, jobId);
             trans.SortedSetRemoveAsync(Helper.GetDelaySortedSetName(_options), jobId);
-            trans.PublishAsync(_queueJobChannelSubscription.Channel, jobId);
+            trans.KeyExpireAsync(hashJobId, TimeSpan.FromDays(_options.DataExpireDay));//进入延迟任务就设置有效期
+            //trans.PublishAsync(_queueJobChannelSubscription.Channel, jobId);
 #pragma warning restore CS4014 // 由于此调用不会等待，因此在调用完成前将继续执行当前方法
             await trans.ExecuteAsync();
 

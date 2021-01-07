@@ -141,6 +141,7 @@ namespace Aix.RedisMessageBus.BackgroundProcess
                     var delaySecond = GetDelaySecond(jobData.ErrorCount);
                     await _redisStorage.ErrorReEnqueneDelay(topic, jobId, TimeSpan.FromSeconds(delaySecond));
                     deleteCount++;
+                    _logger.LogInformation($"redis消费失败,topic:{jobData.Topic},{delaySecond}秒后将进行{jobData.ErrorCount }次重试");
                 }
 
             }

@@ -16,16 +16,20 @@ namespace RedisMessageBusSample
             var options = CmdOptions.Options;
             services.AddSingleton(options);
 
+            #region messagebus相关
             var redisMessageBusOptions = context.Configuration.GetSection("redis-messagebus").Get<RedisMessageBusOptions>();
             redisMessageBusOptions.IsRetry = ex =>
             {
-                //if (typeof(BizException) != ex.GetType())
-                //    return Task.FromResult(true);
+                if (typeof(BizException) != ex.GetType())
+                {
+                    return Task.FromResult(true);
+                }
                 return Task.FromResult(false);
             };
             services.AddRedisMessageBus(redisMessageBusOptions); //list实现
                                                                  //services.AddRedisMessageBusPubSub(redisMessageBusOptions);//发布订阅实现
 
+            #endregion
 
             if ((options.Mode & (int)ClientMode.Consumer) > 0)
             {

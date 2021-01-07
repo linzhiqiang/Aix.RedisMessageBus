@@ -46,7 +46,7 @@ namespace RedisMessageBusSample.HostedService
                     //await Task.Delay(1000);
                     _logger.LogInformation($"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss fff")}消费--1--数据：MessageId={message.MessageId},Content={message.Content},count={current}");
                    
-                   // throw new Exception("333");
+                    throw new Exception("333");
                     await Task.CompletedTask;
                 }, null, cancellationToken);
             }
